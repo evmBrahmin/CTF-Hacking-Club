@@ -123,6 +123,7 @@ contract AssetHolder is Context, ERC165, IERC1155, IERC1155MetadataURI {
     }
 
     /// @dev transfers single NFT id from `from` to `to` for a select token type `id`
+    // @audit this constraint of only allow trnasfers to accounds which dont own same token type ID seems sus
     /// @dev transfers only allowed to accounts which don't already own same token type `id`
     function _safeTransferFrom(
         address from,
@@ -138,6 +139,7 @@ contract AssetHolder is Context, ERC165, IERC1155, IERC1155MetadataURI {
         uint256[] memory ids = _asSingletonArray(id);
         uint256[] memory amounts = _asSingletonArray(amount);
 
+        // @audit unimplemented
         _beforeTokenTransfer(operator, from, to, ids, amounts, data);
 
         uint256 nftId = abi.decode(data,(uint256));
@@ -151,7 +153,7 @@ contract AssetHolder is Context, ERC165, IERC1155, IERC1155MetadataURI {
         _idOwned[id][to] = nftId;
 
         emit TransferSingle(operator, from, to, id, amount);
-
+        // unimplemented
         _afterTokenTransfer(operator, from, to, ids, amounts, data);
 
         _doSafeTransferAcceptanceCheck(operator, from, to, id, amount, data);
@@ -357,7 +359,6 @@ contract AssetHolder is Context, ERC165, IERC1155, IERC1155MetadataURI {
         bytes memory data
     ) private {
         if (to.isContract()) {
-            // @audit common area of concern
             try IERC1155Receiver(to).onERC1155Received(operator, from, id, amount, data) returns (bytes4 response) {
                 if (response != IERC1155Receiver.onERC1155Received.selector) {
                     revert("ERC1155: ERC1155Receiver rejected tokens");

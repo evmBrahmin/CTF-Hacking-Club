@@ -66,6 +66,7 @@ contract AssetWrapper is AssetHolder, Ownable {
         address assetAddress
     ) public {
         require(isWhitelisted(assetAddress), "Wrapper: asset not whitelisted");
+        // @audit _wrap makes external call to ERC1155Receiver
         _wrap(assetOwner, assetAddress, nftId);
 
         IGameAsset asset = IGameAsset(assetAddress);
@@ -89,6 +90,7 @@ contract AssetWrapper is AssetHolder, Ownable {
 
     /// @dev unwraps assets and transfers NFT back to user `assetOwner`
     /// @dev per game mechanics user has max of one wrapped NFT per token ID
+    // @audit this is what we want to grief - we want to make it so that the user can't unwrap their NFT
     function unwrap(
         address assetOwner,
         address assetAddress
